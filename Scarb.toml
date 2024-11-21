@@ -1,0 +1,6 @@
+[package]
+name = "koji"
+version = "0.1.0"
+
+[dependencies]
+orion = { git = "https://github.com/gizatechxyz/orion.git", tag = "v0.2.4" }
