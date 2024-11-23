@@ -24,7 +24,17 @@ trait MidiTrait {
     /// Instantiate a Midi.
     fn new() -> Midi;
     /// create music to be consumed by web app - maybe add flags to reverse notes
-    fn music(reverse: i32) -> Midi;
+    fn music(
+        reverse: i32,
+        semitones: i32,
+        grid_size: usize,
+        factor: i32,
+        new_tempo: u32,
+        chanel: u32,
+        steps: i32,
+        tonic: PitchClass,
+        modes: Modes
+    ) -> Midi;
     /// Append a message in a Midi object.
     fn append_message(self: @Midi, msg: Message) -> Midi;
     /// Transpose notes by a given number of semitones.
@@ -60,7 +70,17 @@ impl MidiImpl of MidiTrait {
         Midi { events: array![].span() }
     }
 
-    fn music(reverse: i32) -> Midi {
+    fn music(
+        reverse: i32,
+        semitones: i32,
+        grid_size: usize,
+        factor: i32,
+        new_tempo: u32,
+        chanel: u32,
+        steps: i32,
+        tonic: PitchClass,
+        modes: Modes
+    ) -> Midi {
         let mut eventlist = ArrayTrait::<Message>::new();
 
         // Set Instrument
@@ -111,7 +131,6 @@ impl MidiImpl of MidiTrait {
         let notemessageoff2 = Message::NOTE_OFF((newnoteoff2));
         let notemessageoff3 = Message::NOTE_OFF((newnoteoff3));
 
-        
         eventlist.append(tempomessage);
         eventlist.append(pcmessage);
 
@@ -123,22 +142,22 @@ impl MidiImpl of MidiTrait {
         eventlist.append(notemessageoff2);
         eventlist.append(notemessageoff3);
 
-        let mut basemidi = Midi { events: eventlist.span() };   
+        let mut basemidi = Midi { events: eventlist.span() };
 
-        // ADD LOGIC HERE TO INTEGRATE THE FOLLOWING FUNCTIONS+ARGUMENTS TO PASS FROM WEB APP:
-        // transpose_notes
-        // quantize_notes
-        // change_note_duration
-        // change_tempo
-        // remap_instruments
-        // generate_harmony
+        let mut finalMidi = basemidi
+            .transpose_notes(semitones)
+            .quantize_notes(grid_size)
+            .change_note_duration(factor)
+            .change_tempo(new_tempo)
+            .remap_instruments(chanel)
+            .generate_harmony(steps, tonic, modes);
 
         if reverse == 0 { //could be a bool
-                } else {
-            let basemidi =  basemidi.reverse_notes();
-        } 
+        } else {
+            finalMidi = finalMidi.reverse_notes();
+        }
 
-       basemidi
+        finalMidi
     }
 
     fn append_message(self: @Midi, msg: Message) -> Midi {
