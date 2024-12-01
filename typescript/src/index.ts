@@ -11,6 +11,7 @@ if (require.main === module) {
 
     try {
         cairoToMidi(cairoFilePath, outputFile);
+        console.log(`MID file was processed successfully and is located at '${outputFile}'.`);
     } catch (error) {
         // @ts-ignore
         console.error(`Error: ${error.message}`);
