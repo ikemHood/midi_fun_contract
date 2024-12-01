@@ -29,7 +29,12 @@ export function cairoToMidi(cairoFilePath: string, outputFile: string): Midi {
  * it tries to adopt cairoParsedMidiEvents inorder to use the parsing logic of the library
  */
 
-function mapCairoParsedMidiEventsToMidi(cairoParsedMidiEvents: CairoParsedMidiEvent[]): Midi {
+export function mapCairoParsedMidiEventsToMidi(cairoParsedMidiEvents: CairoParsedMidiEvent[]): Midi {
+    const midi = new Midi();
+    //Base case returns an empty midi
+    if (!cairoParsedMidiEvents || cairoParsedMidiEvents.length === 0) {
+        return midi
+    }
     const parsedHeader = cairoParsedMidiEvents.shift();
     const tracks = splitByEndOfTrack(cairoParsedMidiEvents)
 
@@ -49,7 +54,6 @@ function mapCairoParsedMidiEventsToMidi(cairoParsedMidiEvents: CairoParsedMidiEv
     }
 
     // Events like setTempo, timeSignature, keySignature, header are used here
-    const midi = new Midi();
     midi.header = new Header(midiData)
 
     tracks.forEach(track => {
@@ -65,7 +69,7 @@ function mapCairoParsedMidiEventsToMidi(cairoParsedMidiEvents: CairoParsedMidiEv
  * CairoParsedMidiEvent[] includes an endOfTrack event.
  * This function detect those events to split the events into tracks
  */
-function splitByEndOfTrack(events: CairoParsedMidiEvent[]): CairoParsedMidiEvent[][] {
+export function splitByEndOfTrack(events: CairoParsedMidiEvent[]): CairoParsedMidiEvent[][] {
     const result: CairoParsedMidiEvent[][] = [];
     let currentTrack: CairoParsedMidiEvent[] = [];
 
