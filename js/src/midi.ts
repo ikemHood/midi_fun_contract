@@ -4,7 +4,7 @@ export interface CairoParsedMidiEvent {
     noteNumber: number;
     velocity: number;
     deltaTime: number;
-    tempo: number;
+    microsecondsPerBeat: number;
     numerator: number;
     denominator: number;
     value: number;
@@ -12,6 +12,9 @@ export interface CairoParsedMidiEvent {
     clock: number;
     absoluteTime: number;
     controllerType: number;
+    ticksPerBeat: number;
+    meta: boolean;
+    programNumber: number;
 }
 
 function toCamelCase(str: string) {
@@ -35,6 +38,10 @@ export function parseEvent(line: string): CairoParsedMidiEvent | null {
     parsedEvent.deltaTime = parseFP32x32(content.match(/time: (FP32x32 {[^}]+})/)?.[1] || "");
 
     switch (type) {
+        case "HEADER":
+            parsedEvent.ticksPerBeat = parseInt(content.match(/ticksPerBeat: (\d+)/)?.[1] || "0");
+            parsedEvent.meta = true
+            break;
         case "NOTE_ON":
         case "NOTE_OFF":
             parsedEvent.channel = parseInt(content.match(/channel: (\d+)/)?.[1] || "0");
@@ -48,7 +55,7 @@ export function parseEvent(line: string): CairoParsedMidiEvent | null {
         case "SET_TEMPO":
             const tempoMag = parseFP32x32(content.match(/tempo: (FP32x32 {[^}]+})/)?.[1] || "");
             if (tempoMag !== undefined) {
-                parsedEvent.tempo = tempoMag;
+                parsedEvent.microsecondsPerBeat = tempoMag;
             }
             const timeOptionMatch = content.match(/time: Option::Some\((FP32x32 {[^}]+})\)/);
             if (timeOptionMatch) {
@@ -56,12 +63,14 @@ export function parseEvent(line: string): CairoParsedMidiEvent | null {
             } else {
                 parsedEvent.deltaTime = undefined;  // No `time` provided
             }
+            parsedEvent.meta = true
             break;
 
         case "TIME_SIGNATURE":
             parsedEvent.numerator = parseInt(content.match(/numerator: (\d+)/)?.[1] || "0");
             parsedEvent.denominator = parseInt(content.match(/denominator: (\d+)/)?.[1] || "0");
             parsedEvent.clock = parseInt(content.match(/clocks_per_click: (\d+)/)?.[1] || "0");
+            parsedEvent.meta = true
             break;
 
         case "CONTROL_CHANGE":
@@ -87,8 +96,12 @@ export function parseEvent(line: string): CairoParsedMidiEvent | null {
             parsedEvent.value = parseInt(content.match(/value: (\d+)/)?.[1] || "0");
             break;
         case "END_OF_TRACK":
+            parsedEvent.meta = true
             break;
-
+        case "PROGRAM_CHANGE":
+            parsedEvent.channel = parseInt(content.match(/channel: (\d+)/)?.[1] || "0");
+            parsedEvent.programNumber = parseInt(content.match(/program: (\d+)/)?.[1] || "0");
+            break;
         default:
             return null;
     }

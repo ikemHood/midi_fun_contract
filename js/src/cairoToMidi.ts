@@ -1,7 +1,7 @@
-import {Midi, Track} from "@tonejs/midi";
+import {Header, Midi, Track} from "@tonejs/midi";
 import * as fs from "fs";
 import {parseEvent, CairoParsedMidiEvent} from './midi'
-import {MidiEvent} from "midi-file";
+import {MidiData, MidiEvent, MidiHeader} from "midi-file";
 
 export function cairoToMidi(cairoFilePath: string, outputFile: string): Midi {
     //file = Read the file cairoFilePath
@@ -17,9 +17,7 @@ export function cairoToMidi(cairoFilePath: string, outputFile: string): Midi {
         }
     });
 
-
-    const midi = new Midi();
-
+    const parsedHeader = midiEvents.shift();
     const tracks = splitByEndOfTrack(midiEvents)
 
     tracks.forEach(track => {
@@ -28,75 +26,22 @@ export function cairoToMidi(cairoFilePath: string, outputFile: string): Midi {
             currentTicks += event.deltaTime;
             event.absoluteTime = currentTicks;
         });
+    })
 
-        const midiTrack = new Track(midiEvents as unknown as MidiEvent[], midi.header)
+    const midiData: MidiData = {
+        header: parsedHeader as unknown as MidiHeader,
+        tracks: tracks as unknown as Array<MidiEvent[]>
+    }
+
+
+    const midi = new Midi();
+    midi.header = new Header(midiData)
+
+    tracks.forEach(track => {
+        const midiTrack = new Track(track as unknown as MidiEvent[], midi.header)
         midi.tracks.push(midiTrack)
     })
 
-
-    // midiEvents.forEach(midiEvent => {
-    //
-    //
-    //     switch (midiEvent.type) {
-    //         case "note_on":
-    //             // const bpm = 120;
-    //             // const deltaTimeTicks = midiEvent.time;
-    //             // const tickDurationInSeconds = 60 / (bpm * ppq);
-    //             // const timeInSeconds = deltaTimeTicks * tickDurationInSeconds;
-    //
-    //             const nextNote = midiEvents[idx + 1]
-    //             if (nextNote != null && nextNote.type == "note_on" && nextNote.note == midiEvent.note) {
-    //
-    //                 const noteOnEvent = midiEvent
-    //                 const noteOffEvent = nextNote
-    //
-    //                 const durationTicks = noteOffEvent.time;
-    //                 track.addNote({
-    //                     midi: midiEvent.note,
-    //                     ticks: noteOnEvent.time,
-    //                     velocity: noteOnEvent.velocity / 127,
-    //                     durationTicks: noteOffEvent.time,
-    //                 });
-    //             }
-    //             break;
-    //
-    //         case "note_off":
-    //             track.addNote({
-    //                 midi: midiEvent.note,
-    //                 velocity: 0,
-    //                 time: midiEvent.time,
-    //             });
-    //             break;
-    //
-    //         case "set_tempo":
-    //             header.setTempo(60000000/midiEvent.tempo)
-    //             break;
-    //
-    //         case "time_signature":
-    //             // Mapeo del evento Cairo
-    //             const ticks = midiEvent.time ? midiEvent.time * ppq : 0; // Convertir tiempo a ticks
-    //             const timeSignature = [midiEvent.numerator, midiEvent.denominator];
-    //
-    //             // Agregar el evento al encabezado
-    //             header.timeSignatures.push({
-    //                 ticks: ticks,
-    //                 timeSignature: timeSignature,
-    //             });
-    //             break;
-    //
-    //         case "control_change":
-    //             track.addCC({
-    //                 number: midiEvent.control,
-    //                 value: midiEvent.value,
-    //                 time: 0
-    //             });
-    //             break;
-    //
-    //         default:
-    //             console.warn(`Unsupported event type: ${midiEvent.type}`);
-    //             break;
-    //     }
-    // })
 
     const midiBuffer = midi.toArray();
     fs.writeFileSync(outputFile, new Uint8Array(midiBuffer));
@@ -108,7 +53,7 @@ export function cairoToMidi(cairoFilePath: string, outputFile: string): Midi {
 
 export async function loadMidi(generatedMidi: Midi) {
     // load a midi file in the browser
-    const fileBuffer = fs.readFileSync("/Users/jrmncos/forks/midi_fun_contract/example/YungTruong.mid");
+    const fileBuffer = fs.readFileSync("/Users/jrmncos/forks/midi_fun_contract/example/HeyBulldog.mid");
 
     const midi = new Midi(fileBuffer);
 
