@@ -86,6 +86,8 @@ export function parseEvent(line: string): CairoParsedMidiEvent | null {
             parsedEvent.noteNumber = parseInt(content.match(/note: (\d+)/)?.[1] || "0");
             parsedEvent.value = parseInt(content.match(/value: (\d+)/)?.[1] || "0");
             break;
+        case "END_OF_TRACK":
+            break;
 
         default:
             return null;
