@@ -5,7 +5,7 @@ if (require.main === module) {
     const [,, cairoFilePath, outputFile] = process.argv;
 
     if (!cairoFilePath || !outputFile) {
-        console.error("Usage: ts-node script.ts <cairoFilePath> <outputFile>");
+        console.error("Usage: ts-node index.ts <cairoFilePath> <outputFile>");
         process.exit(1);
     }
 
