@@ -126,18 +126,25 @@ impl MidiImpl of MidiTrait {
         let tempomessage = Message::SET_TEMPO((newtempo));
 
         let notemessageon1 = Message::NOTE_ON((newnoteon1));
+       
         let notemessageon2 = Message::NOTE_ON((newnoteon2));
+        
         let notemessageon3 = Message::NOTE_ON((newnoteon3));
 
         let notemessageoff1 = Message::NOTE_OFF((newnoteoff1));
+            
         let notemessageoff2 = Message::NOTE_OFF((newnoteoff2));
+        
         let notemessageoff3 = Message::NOTE_OFF((newnoteoff3));
 
         eventlist.append(tempomessage);
+        
         eventlist.append(pcmessage);
 
         eventlist.append(notemessageon1);
+            
         eventlist.append(notemessageon2);
+        
         eventlist.append(notemessageon3);
 
         eventlist.append(notemessageoff1);
