@@ -139,7 +139,9 @@ impl MidiImpl of MidiTrait {
         eventlist.append(notemessageon3);
 
         eventlist.append(notemessageoff1);
+
         eventlist.append(notemessageoff2);
+
         eventlist.append(notemessageoff3);
 
         let mut basemidi = Midi { events: eventlist.span() };
