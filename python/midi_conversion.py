@@ -8,6 +8,8 @@ def midi_to_cairo_struct(midi_file, output_file):
     mid = mido.MidiFile(midi_file)
     cairo_events = []
 
+    cairo_events.append(
+        f"Message::HEADER(Header {{ ticksPerBeat: {mid.ticks_per_beat} }})")
     for track in mid.tracks:
         for msg in track:
             time = format_fp32x32(msg.time)
@@ -37,6 +39,12 @@ def midi_to_cairo_struct(midi_file, output_file):
             elif msg.type == 'polyphonic_key_pressure':
                 cairo_events.append(
                     f"Message::POLY_TOUCH(PolyTouch {{ channel: {msg.channel}, note: {msg.note}, value: {msg.value}, time: {time} }})")
+            elif msg.type == 'end_of_track':
+                cairo_events.append(
+                    f"Message::END_OF_TRACK(EndOfTrack {{ time: {time} }})")
+            elif msg.type == "program_change":
+                cairo_events.append(
+                    f"Message::PROGRAM_CHANGE(ProgramChange {{ channel: {msg.channel}, program: {msg.program}, time: {time} }})")
 
     cairo_code_start = "use koji::midi::types::{Midi, Message, NoteOn, NoteOff, SetTempo, TimeSignature, ControlChange, PitchWheel, AfterTouch, PolyTouch, Modes };\nuse orion::numbers::FP32x32;\n\nfn midi() -> Midi {\n    Midi {\n        events: array![\n"
     cairo_code_events = ',\n'.join(cairo_events)
