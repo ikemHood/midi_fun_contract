@@ -70,6 +70,8 @@ impl MidiImpl of MidiTrait {
         Midi { events: array![].span() }
     }
 
+    // Current basic midi structure for playback
+
     fn music(
         reverse: i32,
         semitones: i32,
