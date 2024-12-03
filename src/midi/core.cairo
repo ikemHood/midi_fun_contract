@@ -70,6 +70,8 @@ impl MidiImpl of MidiTrait {
         Midi { events: array![].span() }
     }
 
+    // Current basic midi structure for playback
+
     fn music(
         reverse: i32,
         semitones: i32,
@@ -139,7 +141,9 @@ impl MidiImpl of MidiTrait {
         eventlist.append(notemessageon3);
 
         eventlist.append(notemessageoff1);
+
         eventlist.append(notemessageoff2);
+
         eventlist.append(notemessageoff3);
 
         let mut basemidi = Midi { events: eventlist.span() };
